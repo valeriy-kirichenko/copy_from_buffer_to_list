@@ -108,7 +108,9 @@ def on_activate_ctrl_v() -> None:
 
 
 if __name__ == '__main__':
-    clear_buffer()
+    clear_buffer() # Очишаем буфер перед началом работы.
+
+    # Создаем таблицу для информационного сообщения.
     table_info: Table = Table()
     table_info.add_column("Описание:", style="magenta")
     table_info.add_row(INFO_MESSAGE, style="cyan")
