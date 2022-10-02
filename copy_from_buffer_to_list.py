@@ -1,13 +1,14 @@
 import os
 import time
 from ctypes import windll
+from typing import List
 
 import clipboard
 from pynput import keyboard
 from rich.console import Console
 from rich.table import Table
 
-HELLO_MESSAGE = (
+INFO_MESSAGE = (
     'Скопированные строки сохраняются в списке который будет выводиться '
     'в окне программы.\nПри вставке из списка, строки отдаются по принципу '
     '"первая скопированная - отдается первой, вторая - второй и т.д."\n'
@@ -19,15 +20,23 @@ HELLO_MESSAGE = (
 
 
 class Queue:
-    def __init__(self) -> None:
-        self.queue = []
+    """Класс для хранения очереди скопированных из буфера обмена данных в
+    текстовом формате.
+    """
 
-    def push(self):
+    def __init__(self) -> None:
+        self.queue: list = []
+
+    def push(self) -> None:
+        """Добавляет в очередь скопированный текст."""
+
         if clipboard.paste():
             self.queue.append(clipboard.paste())
             clipboard.copy(self.queue[0])
 
-    def pop(self):
+    def pop(self) -> None:
+        """Убирает из очереди первый элемент."""
+
         try:
             self.queue.pop(0)
             if self.queue:
@@ -37,21 +46,34 @@ class Queue:
         except IndexError:
             pass
 
-    def get_queue(self):
+    def get_queue(self) -> list:
+        """Возвращает список со скопированными данными."""
+
         return self.queue
 
 
-def clear_buffer():
+def clear_buffer() -> None:
+    """Очищает буфер обмена."""
+
     if windll.user32.OpenClipboard(None):
         windll.user32.EmptyClipboard()
         windll.user32.CloseClipboard()
 
 
-def clear_console():
+def clear_console() -> None:
+    """Очищает консоль."""
+
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
-def print_data(data, is_v=True):
+def print_data(data: List[str], is_v: bool = True) -> None:
+    """Выводит в консоль данные из очереди в виде таблицы.
+
+    Args:
+        data (List[str]): список со скопированными данными.
+        is_v (bool, optional): Флаг для "Ctrl+v". По умолчанию True.
+    """
+
     table_data = Table()
     table_data.add_column("Скопированные данные:", style="magenta")
     if data:
@@ -67,14 +89,18 @@ def print_data(data, is_v=True):
             console.print(table_data)
 
 
-def on_activate_c():
+def on_activate_ctrl_c() -> None:
+    """Выполняется при нажатии "Ctrl+c", копирует текст в очередь."""
+
     time.sleep(1/10)
     queue.push()
     clear_console()
     print_data(queue.get_queue(), is_v=False)
 
 
-def on_activate_v():
+def on_activate_ctrl_v() -> None:
+    """Выполняется при нажатии "Ctrl+v", вставляет текст из очереди."""
+
     time.sleep(1/10)
     queue.pop()
     clear_console()
@@ -83,15 +109,15 @@ def on_activate_v():
 
 if __name__ == '__main__':
     clear_buffer()
-    table = Table()
+    table: Table = Table()
     table.add_column("Описание:", style="magenta")
-    table.add_row(HELLO_MESSAGE, style="cyan")
+    table.add_row(INFO_MESSAGE, style="cyan")
 
-    console = Console()
+    console: Console = Console()
     console.print(table)
 
-    queue = Queue()
+    queue: Queue = Queue()
     with keyboard.GlobalHotKeys(
-        {'<ctrl>+c': on_activate_c, '<ctrl>+v': on_activate_v}
+        {'<ctrl>+c': on_activate_ctrl_c, '<ctrl>+v': on_activate_ctrl_v}
     ) as h:
         h.join()
