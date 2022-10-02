@@ -109,12 +109,12 @@ def on_activate_ctrl_v() -> None:
 
 if __name__ == '__main__':
     clear_buffer()
-    table: Table = Table()
-    table.add_column("Описание:", style="magenta")
-    table.add_row(INFO_MESSAGE, style="cyan")
+    table_info: Table = Table()
+    table_info.add_column("Описание:", style="magenta")
+    table_info.add_row(INFO_MESSAGE, style="cyan")
 
     console: Console = Console()
-    console.print(table)
+    console.print(table_info)
 
     queue: Queue = Queue()
     with keyboard.GlobalHotKeys(
