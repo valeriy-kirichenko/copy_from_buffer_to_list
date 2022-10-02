@@ -9,7 +9,6 @@
 Системные требования
 ----------
 * Python 3.9+
-* Works on Linux, Windows, macOS, BSD
 
 Стек технологий
 ----------
@@ -21,11 +20,15 @@
 ```bash
 git clone 'git@github.com:valeriy-kirichenko/copy_from_buffer_to_list.git'
 ```
-2. Запустите проект, выполните команду:
+2. Установите необходимые для работы скрипта пакеты:
+```bash
+pip install clipboard pynput
+```
+3. Запустите проект, выполните команду:
 ```bash
 python copy_from_buffer_to_list.py
 ```
-3. Надеюсь кому то пригодится!
+4. Надеюсь кому то пригодится!
 
 ----------
 Автор:
