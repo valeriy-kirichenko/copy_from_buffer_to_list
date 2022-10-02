@@ -20,7 +20,7 @@
 ```bash
 git clone 'git@github.com:valeriy-kirichenko/copy_from_buffer_to_list.git'
 ```
-2. Установите необходимые для работы скрипта библиотеки:
+2. Установите необходимые для работы скрипта модули и библиотеки:
 ```bash
 pip install clipboard pynput rich
 ```
