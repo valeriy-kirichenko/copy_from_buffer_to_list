@@ -22,7 +22,7 @@ git clone 'git@github.com:valeriy-kirichenko/copy_from_buffer_to_list.git'
 ```
 2. Установите необходимые для работы скрипта пакеты:
 ```bash
-pip install clipboard pynput
+pip install clipboard pynput rich
 ```
 3. Запустите проект, выполните команду:
 ```bash
