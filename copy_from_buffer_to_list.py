@@ -25,7 +25,7 @@ class Queue:
     """
 
     def __init__(self) -> None:
-        self.queue: list = []
+        self.queue: List[str] = []
 
     def push(self) -> None:
         """Добавляет в очередь скопированный текст."""
@@ -74,7 +74,7 @@ def print_data(data: List[str], is_v: bool = True) -> None:
         is_v (bool, optional): Флаг для "Ctrl+v". По умолчанию True.
     """
 
-    table_data = Table()
+    table_data: Table = Table()
     table_data.add_column("Скопированные данные:", style="magenta")
     if data:
         for number, text in enumerate(data, 1):
