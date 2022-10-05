@@ -120,6 +120,11 @@ if __name__ == '__main__':
 
     queue: Queue = Queue()
     with keyboard.GlobalHotKeys(
-        {'<ctrl>+c': on_activate_ctrl_c, '<ctrl>+v': on_activate_ctrl_v}
+        {
+            '<ctrl>+c': on_activate_ctrl_c,
+            '<ctrl>+v': on_activate_ctrl_v,
+            '<ctrl>+с': on_activate_ctrl_c,
+            '<ctrl>+м': on_activate_ctrl_v
+        }
     ) as h:
         h.join()
