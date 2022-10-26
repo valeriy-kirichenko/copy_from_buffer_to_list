@@ -8,7 +8,7 @@ from pynput import keyboard
 from rich.console import Console
 from rich.table import Table
 
-INFO_MESSAGE = (
+INFO_MESSAGE: str = (
     'Скопированные строки сохраняются в списке который будет выводиться '
     'в окне программы.\nПри вставке из списка, строки отдаются по принципу '
     '"первая скопированная - отдается первой, вторая - второй и т.д."\n'
@@ -26,23 +26,29 @@ class Queue:
 
     def __init__(self) -> None:
         self.queue: List[str] = []
+        self.temp_string: str = ''
 
     def push(self) -> None:
         """Добавляет в очередь скопированный текст."""
 
         if clipboard.paste():
             self.queue.append(clipboard.paste())
+            self.temp_string = self.queue[0]
             clipboard.copy(self.queue[0])
 
-    def pop(self) -> None:
+    def pop(self, get: bool = False) -> None:
         """Убирает из очереди первый элемент."""
 
         try:
-            self.queue.pop(0)
-            if self.queue:
-                clipboard.copy(self.queue[0])
+            if not get:
+                self.queue.pop(0)
+                if self.queue:
+                    self.temp_string = self.queue[0]
+                    clipboard.copy(self.queue[0])
+                else:
+                    clear_buffer()
             else:
-                clear_buffer()
+                clipboard.copy(self.temp_string)
         except IndexError:
             pass
 
@@ -107,8 +113,20 @@ def on_activate_ctrl_v() -> None:
     print_data(queue.get_queue())
 
 
+def on_activate_ctrl_shift_v() -> None:
+    """Выполняется при нажатии "Ctrl+Shift+v", позволяет несколько раз
+    вставлять скопированный текст."""
+
+    time.sleep(1/10)
+    queue.pop(get=True)
+    kb = keyboard.Controller()
+    kb.type(clipboard.paste())
+    clear_console()
+    print_data(queue.get_queue())
+
+
 if __name__ == '__main__':
-    clear_buffer() # Очишаем буфер перед началом работы.
+    clear_buffer()  # Очишаем буфер перед началом работы.
 
     # Создаем таблицу для информационного сообщения.
     table_info: Table = Table()
@@ -124,7 +142,8 @@ if __name__ == '__main__':
             '<ctrl>+c': on_activate_ctrl_c,
             '<ctrl>+v': on_activate_ctrl_v,
             '<ctrl>+с': on_activate_ctrl_c,
-            '<ctrl>+м': on_activate_ctrl_v
+            '<ctrl>+м': on_activate_ctrl_v,
+            '<ctrl>+b': on_activate_ctrl_shift_v,
         }
     ) as h:
         h.join()
