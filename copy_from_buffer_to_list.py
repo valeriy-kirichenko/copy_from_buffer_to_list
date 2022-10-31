@@ -12,6 +12,10 @@ INFO_MESSAGE: str = (
     'Скопированные строки сохраняются в списке который будет выводиться '
     'в окне программы.\nПри вставке из списка, строки отдаются по принципу '
     '"первая скопированная - отдается первой, вторая - второй и т.д."\n'
+    'Для отправки множества копий одного текста достаточно включить режим '
+    '"∞" нажав Ctrl+b. Перед первым элементом в списке появится знак '
+    'бесконечности. При повторном нажатии - отключается режим "∞", из списка '
+    'убирается первый элемент.\n'
     'Все стандартно:\n\tКопировать - Ctrl+c.\n\tВствить - Ctrl+v.\n'
     'Если по ошибке скопировалась не та строка, можно кликнуть по пустому '
     'месту в окне \nпрограммы(не в поле ввода текста!) и нажать Ctrl+v, '
@@ -26,29 +30,27 @@ class Queue:
 
     def __init__(self) -> None:
         self.queue: List[str] = []
-        self.temp_string: str = ''
+        self.many_copies: bool = False
 
     def push(self) -> None:
         """Добавляет в очередь скопированный текст."""
-
-        if clipboard.paste():
-            self.queue.append(clipboard.paste())
-            self.temp_string = self.queue[0]
+        paste_data = clipboard.paste()
+        if paste_data:
+            self.queue.append(paste_data)
             clipboard.copy(self.queue[0])
 
-    def pop(self, get: bool = False) -> None:
-        """Убирает из очереди первый элемент."""
+    def pop(self) -> None:
+        """Убирает из очереди первый элемент и копирует его в буфер обмена."""
 
         try:
-            if not get:
+            if not self.many_copies:
                 self.queue.pop(0)
                 if self.queue:
-                    self.temp_string = self.queue[0]
                     clipboard.copy(self.queue[0])
                 else:
                     clear_buffer()
             else:
-                clipboard.copy(self.temp_string)
+                pass
         except IndexError:
             pass
 
@@ -84,14 +86,22 @@ def print_data(data: List[str], is_v: bool = True) -> None:
     table_data.add_column("Скопированные данные:", style="magenta")
     if data:
         for number, text in enumerate(data, 1):
-            table_data.add_row(
-                f'{number}. {text}', style="cyan", end_section=True
-            )
+            if number == 1 and queue.many_copies:
+                table_data.add_row(
+                    f'∞ {number}. {text}', style="cyan", end_section=True
+                )
+            else:
+                table_data.add_row(
+                    f'{number}. {text}', style="cyan", end_section=True
+                )
         console.print(table_data)
     else:
         if is_v:
             clear_console()
-            table_data.add_row('Нет данных', style="cyan")
+            if queue.many_copies:
+                table_data.add_row('Нет данных (∞)', style="cyan")
+            else:
+                table_data.add_row('Нет данных', style="cyan")
             console.print(table_data)
 
 
@@ -113,16 +123,26 @@ def on_activate_ctrl_v() -> None:
     print_data(queue.get_queue())
 
 
-def on_activate_ctrl_shift_v() -> None:
-    """Выполняется при нажатии "Ctrl+Shift+v", позволяет несколько раз
-    вставлять скопированный текст."""
+def on_activate_ctrl_b() -> None:
+    """Включает режим "∞" позволяющий копировать первый элемент в списке
+    множество раз."""
 
-    time.sleep(1/10)
-    queue.pop(get=True)
-    kb = keyboard.Controller()
-    kb.type(clipboard.paste())
-    clear_console()
-    print_data(queue.get_queue())
+    if queue.many_copies:
+        if queue.get_queue():
+            queue.queue.pop(0)
+            try:
+                clipboard.copy(queue.queue[0])
+            except IndexError:
+                pass
+        else:
+            clear_buffer()
+        queue.many_copies = False
+        clear_console()
+        print_data(queue.get_queue())
+    else:
+        queue.many_copies = True
+        clear_console()
+        print_data(queue.get_queue())
 
 
 if __name__ == '__main__':
@@ -140,10 +160,11 @@ if __name__ == '__main__':
     with keyboard.GlobalHotKeys(
         {
             '<ctrl>+c': on_activate_ctrl_c,
-            '<ctrl>+v': on_activate_ctrl_v,
             '<ctrl>+с': on_activate_ctrl_c,
+            '<ctrl>+v': on_activate_ctrl_v,
             '<ctrl>+м': on_activate_ctrl_v,
-            '<ctrl>+b': on_activate_ctrl_shift_v,
+            '<ctrl>+b': on_activate_ctrl_b,
+            '<ctrl>+и': on_activate_ctrl_b,
         }
     ) as h:
         h.join()
